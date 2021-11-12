@@ -1,0 +1,18 @@
+/*!
+ * Copyright (c) 2021  Denis Kuzmin <x-3F@outlook.com> github/3F
+ * Licensed under the MIT License (MIT).
+ * See accompanying License.txt file or visit https://github.com/3F/gh3Fs.action.js/
+*/
+
+export default class AppException extends Error
+{
+    constructor(message, arg)
+    {
+        super(message);
+
+        this.message    = message;
+        this.arg        = arg;
+
+        if(arg) console.error(arg);
+    }
+}

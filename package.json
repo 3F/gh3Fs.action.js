@@ -1,0 +1,33 @@
+{
+  "name": "gh3fs.action.js",
+  "version": "1.0.0",
+  "description": "an action in action ... github/3F",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Test me please :(\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3F/gh3Fs.action.js.git"
+  },
+  "keywords": [
+    "github",
+    "statistics",
+    "repositories",
+    "profile",
+    "github-profile",
+    "github-actions",
+    "github-statistics"
+  ],
+  "author": "Denis Kuzmin <x-3F@outlook.com> github/3F",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/3F/gh3Fs.action.js/issues"
+  },
+  "homepage": "https://github.com/3F/gh3Fs.action.js#readme",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "mrjt": "^1.0.0"
+  }
+}

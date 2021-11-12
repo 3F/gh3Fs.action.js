@@ -1,0 +1,15 @@
+name: 'gh3fs.action.js'
+description: 'an action in action ... github/3F'
+inputs:
+  path:
+    description: 'Target directory path to save result.'
+    required: true
+  pinned:
+    description: 'Comma separated list of pinned repositories in profile.'
+    required: true
+outputs:
+  result:
+    description: ''
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

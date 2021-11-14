@@ -4,11 +4,12 @@
  * See accompanying License.txt file or visit https://github.com/3F/gh3Fs.action.js/
 */
 
-import NumFormatter from './NumFormatter';
+import Arguments from './Arguments';
+import GitObjects from './GitObjects';
 import AppException from './Exceptions/AppException';
 import ArgumentNullException from './Exceptions/ArgumentNullException';
 import Log from './Log';
-import Arguments from './Arguments';
+import NumFormatter from './NumFormatter';
 
 export default class GithubApiGql
 {
@@ -27,19 +28,44 @@ export default class GithubApiGql
     #cid = '[gh3Fs.action.js]';
     #defaultMessage = 'update using gh3Fs.action.js';
 
-    async commitBase64(content, msg = null)
+    async isUpToDate(path, files)
+    {
+        if(!files) throw new ArgumentNullException('files');
+
+        const remote = await this.#getGitObjectsIds(path);
+        if(remote == null || remote.size != files.length)
+        {
+            return false;
+        }
+
+        for(let f of files)
+        {
+            Log.dbg(`Check ${f.path} as git objects`);
+            if(!remote.has(f.path)) return false;
+
+            const roid = remote.get(f.path).oid;
+            const loid = GitObjects.hash(f.contents);
+
+            Log.dbg(f.path, roid, loid);
+            if(roid != loid) return false;
+        }
+
+        return true;
+    }
+
+    async commit(content, msg = null)
     {
         if(!content) throw new ArgumentNullException('content');
 
         for(let data of content)
         {
-            data.contents = Arguments.getAsBase64(data.contents);
+            data.contents = Arguments.getAsBase64(GitObjects.normalize(data.contents));
         }
 
-        return await this.commit(content, msg);
+        return await this.commitRaw(content, msg);
     }
 
-    async commit(files, msg = null)
+    async commitRaw(files, msg = null)
     {
         if(!files) throw new ArgumentNullException('files');
 
@@ -379,5 +405,37 @@ export default class GithubApiGql
             public:     rpublic,
             forks:      rforks,
         };
+    }
+
+    async #getGitObjectsIds(path)
+    {
+        if(!path) throw new ArgumentNullException('path');
+
+        const q = await this.#octokit.graphql
+        (`
+            query info($login: String!, $repo: String!, $path: String!)
+            {
+                repository(owner: $login, name: $repo)
+                {
+                    object(expression: $path) {
+                    ... on Tree { entries {
+                      # name
+                        path
+                        object { ... on Blob { oid, byteSize } }
+                    }}}
+                }
+            }`, { login: this.#username, repo: this.#reponame, path: 'HEAD:' + path }
+        );
+
+        if(!q.repository.object) return null;
+
+        const ret = new Map();
+        for(let f of q.repository.object.entries)
+        {
+            ret.set(f.path, { oid: f.object.oid, size: f.object.byteSize });
+        }
+
+        Log.dbg('Git objects', ret);
+        return ret;
     }
 }

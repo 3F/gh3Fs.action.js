@@ -17,20 +17,24 @@ async function run(token, dpath, pinned = null)
 
     const tstat = './templates/overview.svg';
     const trepo = './templates/repo.svg';
-    Log.dbg('Input pinned',  pinned);
     Log.dbg('Input path', dpath);
+    Log.dbg('Input pinned',  pinned);
+
+    const path = await import('path');
+    const dstats = path.posix.join(dpath, 'statistics');
+    const drepos = path.posix.join(dpath, 'repositories');
 
     const tpl   = new SvgTpl();
     const api   = new GithubApiGql(token);
-    const path  = require('path');
 
     const gstat = await tpl.render(tstat, await api.getStat());
-    let files =
+    let fstats =
     [{ 
-        path: path.posix.join(dpath, 'statistics', 'overview.svg'),
+        path: path.posix.join(dstats, 'overview.svg'),
         contents: gstat
     }];
 
+    let frepos = [];
     if(pinned)
     {
         const repos = await api.getStatForRepositories(pinned.split(','));
@@ -43,34 +47,44 @@ async function run(token, dpath, pinned = null)
     
             const grepo = await tpl.render(trepo, repo);
     
-            files.push
+            frepos.push
             ({
-                path: path.posix.join(dpath, 'repositories/', repo.name +'.svg'),
+                path: path.posix.join(drepos, repo.name +'.svg'),
                 contents: grepo
             });
         }
     }
 
-    const result = await api.commitBase64(files);
-    core.setOutput('result', result);
-    Log.info('Done.', result);
-}
+    let result;
+    if(!await api.isUpToDate(dstats, fstats) || !await api.isUpToDate(drepos, frepos))
+    {
+        Log.info('Outdated data. Start updating ...');
+        result = await api.commit([...fstats, ...frepos]);
+    }
+    else
+    {
+        Log.info('There is nothing to do. Everything is up-to-date.');
+        result = { oid: null, url: null };
+    }
 
-const core = require('@actions/core');
-Log.debug = false;
+    Log.info('Done.', result);
+    return result;
+}
 
 (async () =>
 {
+    const core = require('@actions/core');
 
+    Log.debug = false;
     try
     {
         const v = Arguments.splitAll(process.argv.slice(2), [':', '=']);
-        await run
+        core.setOutput('result', await run
         (
             core.getInput('token')  || v['token'] || process.env.GH_S_PK,
             core.getInput('path')   || v['path'],
             core.getInput('pinned') || v['pinned'],
-        )
+        ));
     }
     catch(ex)
     {

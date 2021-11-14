@@ -6,6 +6,7 @@
 
 import Arguments from './Arguments';
 import ArgumentNullException from './Exceptions/ArgumentNullException';
+import { JtConfig } from 'mrjt';
 
 export default class JtCaptureHandler
 {
@@ -29,8 +30,7 @@ export default class JtCaptureHandler
     constructor(pair)
     {
         if(!pair) throw new ArgumentNullException('pair');
-        
-        const { JtConfig } = require('mrjt');
+
         const config = new JtConfig(Arguments.escapeRegex(pair));
 
         this.#pattern = new RegExp

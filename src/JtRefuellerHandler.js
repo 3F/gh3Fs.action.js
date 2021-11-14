@@ -6,6 +6,7 @@
 
 import Arguments from './Arguments';
 import ArgumentNullException from './Exceptions/ArgumentNullException';
+import { JtConfig } from 'mrjt';
 
 export default class JtRefuellerHandler
 {
@@ -41,7 +42,6 @@ export default class JtRefuellerHandler
     {
         if(!pair) throw new ArgumentNullException('pair');
 
-        const { JtConfig } = require('mrjt');
         this.#config = new JtConfig(Arguments.escapeRegex(pair));
     }
 }

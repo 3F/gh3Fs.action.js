@@ -7,6 +7,7 @@
 import Arguments from './Arguments';
 import JtCaptureHandler from './JtCaptureHandler'
 import JtRefuellerHandler from './JtRefuellerHandler'
+import { Jt } from 'mrjt'
 
 export default class SvgTpl
 {
@@ -36,7 +37,6 @@ export default class SvgTpl
         const { promises: fs } = require('fs');
         this.#fs = fs;
 
-        const { Jt } = require('mrjt');
         this.#jt = new Jt();
 
         this.#jtc = new JtCaptureHandler('{}');

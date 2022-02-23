@@ -3,3 +3,5 @@
 /dist/*.js.map
 /dist/sourcemap-register.js
 /generated
+/.vscode/launch.json
+/.vscode/tasks.json

@@ -25,8 +25,9 @@ export default class GithubApiGql
     #octokit;
     #username;
 
-    #cid = '[gh3Fs.action.js]';
-    #defaultMessage = 'update using gh3Fs.action.js';
+    #sid = 'gh3Fs.action.js';
+    #cid = '[' + this.#sid + ']';
+    #defaultMessage = 'update using ' + this.#sid;
 
     async isUpToDate(path, files)
     {
@@ -192,6 +193,58 @@ export default class GithubApiGql
 
         Log.dbg("getStatForRepositories(names):", names, repositories);
         return repositories;
+    }
+
+    async trimWorkflowRuns(minimal)
+    {
+        //FIXME: Seems github only provide REST API for "Workflow Runs" today.
+        //       i.e. No queries or mutations for GraphQL.
+
+        const limit = 100;
+
+        let page    = Math.max(1, minimal) / limit;
+        let modulo  = Math.ceil(page % 1 * limit);
+        page        = Math.floor(page) + 1; // 0 == 1 pages are identical in API !
+
+        const req =
+        {
+            owner:          this.#username,
+            repo:           this.#reponame,
+            workflow_id:    this.#sid + '.yml',
+            per_page:       limit,
+            page:           page,
+        }
+        const cur = await this.#octokit.rest.actions.listWorkflowRuns(req);
+
+        // The logic below can work without waiting response for each #deleteWorkflowRun call
+        // Which is really helpful ... when you have 2400 WorkflowRuns to be trimmed and when about 100 await requests ~= 1 minute,
+        //                             that is, ~30 minutes to complete these requests is quite ... vs ~20 seconds.
+        // But, about 300 requests for a 2 seconds can cause the exceeded a secondary rate limit (btw, 100 requests for 1 sec was okay for me):
+        // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#secondary-rate-limits
+        //
+        // Well actually it would be good to see some special API to delete serial runs including using APIv4 GraphQL, but...
+
+        req.page = Math.floor(cur.data.total_count / limit) + 1;
+        while(req.page > page)
+        {
+            Log.dbg('rcv new due to ' + req.page + ' > ' + page);
+            const tail = await this.#octokit.rest.actions.listWorkflowRuns(req);
+            req.page -= 1; // in contrast, for other logic (like when you delete everything only on current page (thereby moving forward))
+                           // these requests may produce ~invalid json response body / Unexpected end of JSON input etc.
+                           // without `await`ing before re-request to the same page.
+
+            for(let r of tail.data.workflow_runs) await this.#deleteWorkflowRun(r);
+        }
+
+        const data = cur.data.workflow_runs;
+        if(data.length < 1)
+        {
+            Log.dbg('everything is trimmed to ', minimal);
+            return;
+        }
+
+        Log.dbg('trimming on page ' + page + '@offset ' + modulo);
+        for(let i = modulo; i < data.length; ++i) await this.#deleteWorkflowRun(data[i]);
     }
 
     constructor(token, updatableCommit = true, username = null, reponame = null)
@@ -381,8 +434,6 @@ export default class GithubApiGql
             {
                 if(node.isFork) ++rforks; else ++rpublic;
             }
-
-            Log.dbg("repository [" + i + "]: " + node.name);
         }
 
         if(q.user.repositories.pageInfo.hasNextPage)
@@ -405,6 +456,22 @@ export default class GithubApiGql
             public:     rpublic,
             forks:      rforks,
         };
+    }
+
+    async #deleteWorkflowRun(data)
+    {
+        //FIXME: Seems github only provide REST API for "Workflow Runs" today.
+        //       i.e. No queries or mutations for GrapghQL.
+
+        const rid = data.id;
+
+        Log.dbg("delete workflow run ... ", [ rid, data.name, data.created_at ]);
+
+        await this.#octokit.rest.actions.deleteWorkflowRun({
+            owner: this.#username,
+            repo: this.#reponame,
+            run_id: rid
+        });
     }
 
     async #getGitObjectsIds(path)

@@ -10,6 +10,40 @@ import GithubApiGql from './GithubApiGql';
 import ArgumentNullException from './Exceptions/ArgumentNullException';
 import Log from './Log';
 
+(async () =>
+{
+    const core = require('@actions/core');
+
+    try
+    {
+        const v = Arguments.splitAll(process.argv.slice(2), [':', '=']);
+        const _k = (key, def) => core.getInput(key) || v[key] || def;
+
+        Log.debug = _k('debug', false) === 'true';
+
+        const token     = _k('token', process.env.GH_S_PK);
+        const clean     = parseInt(_k('clean')) || 800;
+        const path      = _k('path');
+        const pinned    = _k('pinned');
+
+        core.setOutput('result', await run(token, path, pinned));
+
+        await cleanup(token, clean);
+    }
+    catch(ex)
+    {
+        core.setFailed(ex.message);
+        Log.err("Fatal", ex);
+    }
+
+})();
+
+/**
+ * @param {string} token API access token.
+ * @param {string} dpath Output path where statistics will be located. 
+ * @param {string} pinned List of project names as pinned projects.
+ * @returns object Oid/url.
+ */
 async function run(token, dpath, pinned = null)
 {
     if(!token) throw new ArgumentNullException("token");
@@ -71,25 +105,14 @@ async function run(token, dpath, pinned = null)
     return result;
 }
 
-(async () =>
+/**
+ * @param {string} token API access token.
+ * @param {integer} clean Clear "Workflow Runs" to a minimal set.
+ */
+async function cleanup(token, clean)
 {
-    const core = require('@actions/core');
+    if(!token) throw new ArgumentNullException("token");
 
-    Log.debug = false;
-    try
-    {
-        const v = Arguments.splitAll(process.argv.slice(2), [':', '=']);
-        core.setOutput('result', await run
-        (
-            core.getInput('token')  || v['token'] || process.env.GH_S_PK,
-            core.getInput('path')   || v['path'],
-            core.getInput('pinned') || v['pinned'],
-        ));
-    }
-    catch(ex)
-    {
-        core.setFailed(ex.message);
-        Log.err("Fatal", ex);
-    }
-
-})();
+    Log.dbg('cleanup ...', clean);
+    await (new GithubApiGql(token)).trimWorkflowRuns(clean);
+}

@@ -13,7 +13,6 @@ import Log from './Log';
 (async () =>
 {
     const core = require('@actions/core');
-
     try
     {
         const v = Arguments.splitAll(process.argv.slice(2), [':', '=']);
@@ -21,14 +20,10 @@ import Log from './Log';
 
         Log.debug = _k('debug', false) === 'true';
 
-        const token     = _k('token', process.env.GH_S_PK);
-        const clean     = parseInt(_k('clean')) || 800;
-        const path      = _k('path');
-        const pinned    = _k('pinned');
+        const token = _k('token', process.env.GH_S_PK);
 
-        core.setOutput('result', await run(token, path, pinned));
-
-        await cleanup(token, clean);
+        core.setOutput('result', await run(token, _k('path'), _k('pinned'), _k('label')));
+        await cleanup(token, parseInt(_k('clean')) || 800);
     }
     catch(ex)
     {
@@ -41,16 +36,18 @@ import Log from './Log';
 /**
  * @param {string} token API access token.
  * @param {string} dpath Output path where statistics will be located. 
- * @param {string} pinned List of project names as pinned projects.
+ * @param {string} pinned Optional list of project names as pinned projects.
+ * @param {string} label Custom account labeling.
  * @returns object Oid/url.
  */
-async function run(token, dpath, pinned = null)
+async function run(token, dpath, pinned = null, label = null)
 {
     if(!token) throw new ArgumentNullException("token");
     if(!dpath) throw new ArgumentNullException("dpath");
 
     const tstat = './templates/overview.svg';
     const trepo = './templates/repo.svg';
+
     Log.dbg('Input path', dpath);
     Log.dbg('Input pinned',  pinned);
 
@@ -61,7 +58,7 @@ async function run(token, dpath, pinned = null)
     const tpl   = new SvgTpl();
     const api   = new GithubApiGql(token);
 
-    const gstat = await tpl.render(tstat, await api.getStat());
+    const gstat = await tpl.render(tstat, await api.getStat(label));
     let fstats =
     [{ 
         path: path.posix.join(dstats, 'overview.svg'),

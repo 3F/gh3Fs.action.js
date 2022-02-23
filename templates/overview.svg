@@ -1,4 +1,4 @@
-<svg width="450" height="60" xmlns="http://www.w3.org/2000/svg">
+<svg width="430" height="54" xmlns="http://www.w3.org/2000/svg">
   <!--
       This template requires Jt templater,
       https://github.com/3F/Jt
@@ -148,19 +148,19 @@
       --color-topic-tag-border: rgba(0, 0, 0, 0);
       --color-overlay-shadow: 0 1px 3px rgba(27, 31, 36, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
       --color-header-text: rgba(255, 255, 255, 0.7);
-      --color-header-bg: #24292f;
+      --color-header-bg: #616b7c;
       --color-header-logo: #ffffff;
-      --color-header-search-bg: #24292f;
+      --color-header-search-bg: #616b7c;
       --color-header-search-border: #57606a;
       --color-input-disabled-bg: rgba(175, 184, 193, 0.2);
-      --color-fg-default: #24292f;
+      --color-fg-default: #616b7c;
       --color-fg-muted: #57606a;
       --color-fg-subtle: #6e7781;
       --color-fg-on-emphasis: #ffffff;
       --color-border-default: #d0d7de;
       --color-border-muted: hsla(210, 18%, 87%, 1);
       --color-border-subtle: rgba(27, 31, 36, 0.15);
-      --color-neutral-emphasis-plus: #24292f;
+      --color-neutral-emphasis-plus: #616b7c;
       --color-neutral-emphasis: #6e7781;
       --color-neutral-muted: rgba(175, 184, 193, 0.2);
       --color-neutral-subtle: rgba(234, 238, 242, 0.5);
@@ -190,7 +190,7 @@
 
   </style>
   <g>
-    <foreignObject width="450" height="60">
+    <foreignObject width="430" height="54">
       <div xmlns="http://www.w3.org/1999/xhtml">
 
         <table>
@@ -255,7 +255,7 @@
               </td>
             </tr>
             <tr>
-              <td><span class="text-bold">Public</span> <span class="Link--active">github/3F</span></td>
+              <td><span class="text-bold">Public</span> <span class="Link--active">%account%</span></td>
               <td>Earned Stars</td>
               <td>Members</td>
               <td>Watchers</td>

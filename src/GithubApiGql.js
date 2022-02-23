@@ -131,13 +131,14 @@ export default class GithubApiGql
         };
     }
 
-    async getStat()
+    async getStat(label = null)
     {
         const u = await this.#getUserStat();
         const r = await this.#getRepositoriesStat();
 
         return {
             followers:  this.#formatter.format(u),
+            account: label || '@' + this.#username,
             repositories:
             {
                 stargazers: this.#formatter.format(r.stargazers),

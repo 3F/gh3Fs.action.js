@@ -1,6 +1,6 @@
 {
   "name": "gh3fs.action.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "an action in action ... github/3F",
   "main": "src/app.js",
   "scripts": {

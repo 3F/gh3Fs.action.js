@@ -182,7 +182,7 @@ export default class GithubApiGql
 
                 url: r.url,
                 description: r.description,
-                shortDescriptionHTML: r.shortDescriptionHTML,
+                descriptionHTML: r.descriptionHTML,
 
                 stargazers: this.#formatter.format(r.stargazers),
                 forks:      this.#formatter.format(r.forks),
@@ -318,7 +318,7 @@ export default class GithubApiGql
                 {
                     url
                     description
-                    shortDescriptionHTML
+                    descriptionHTML
                     stargazerCount
                     forkCount
                     watchers{ totalCount }
@@ -349,14 +349,14 @@ export default class GithubApiGql
         Log.dbg("#getStatForRepository(name):", name, q.repository, languages);
 
         return {
-            url:                    q.repository.url,
-            description:            q.repository.description,
-            shortDescriptionHTML:   q.repository.shortDescriptionHTML,
-            stargazers:             q.repository.stargazerCount,
-            forks:                  q.repository.forkCount,
-            watchers:               q.repository.watchers.totalCount,
-            languages:              languages,
-            code:                   q.repository.languages.totalSize,
+            url:                q.repository.url,
+            description:        q.repository.description,
+            descriptionHTML:    q.repository.descriptionHTML,
+            stargazers:         q.repository.stargazerCount,
+            forks:              q.repository.forkCount,
+            watchers:           q.repository.watchers.totalCount,
+            languages:          languages,
+            code:               q.repository.languages.totalSize,
         }
     }
 

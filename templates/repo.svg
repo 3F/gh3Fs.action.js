@@ -285,7 +285,7 @@
                 </span>
 
                 <p class="text-small mt-2 mb-3">
-                  %shortDescriptionHTML%
+                  %descriptionHTML%
                 </p>
 
               </div>

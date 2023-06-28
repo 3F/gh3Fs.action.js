@@ -183,6 +183,7 @@ export default class GithubApiGql
                 url: r.url,
                 description: r.description,
                 descriptionHTML: r.descriptionHTML,
+                isFork: r.isFork,
 
                 stargazers: this.#formatter.format(r.stargazers),
                 forks:      this.#formatter.format(r.forks),
@@ -319,6 +320,7 @@ export default class GithubApiGql
                     url
                     description
                     descriptionHTML
+                    isFork
                     stargazerCount
                     forkCount
                     watchers{ totalCount }
@@ -352,6 +354,7 @@ export default class GithubApiGql
             url:                q.repository.url,
             description:        q.repository.description,
             descriptionHTML:    q.repository.descriptionHTML,
+            isFork:             q.repository.isFork,
             stargazers:         q.repository.stargazerCount,
             forks:              q.repository.forkCount,
             watchers:           q.repository.watchers.totalCount,

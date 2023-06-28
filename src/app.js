@@ -75,7 +75,11 @@ async function run(token, dpath, pinned = null, label = null)
             (
                 (a, b) => b.bytes - a.bytes
             );
-    
+
+            // L-13. GitHub API at current time has a bug with g-emoji (fallback) causing updates every request.
+            // Affected `shortDescriptionHTML` and partially `descriptionHTML`
+            repo.descriptionHTML = Arguments.escapeHtml(repo.description);
+
             const grepo = await tpl.render(trepo, repo);
     
             frepos.push

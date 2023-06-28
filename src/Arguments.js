@@ -49,6 +49,15 @@ export default class Arguments
         return str.replace(/[\[\]{}().?*+\\^$]/g, '\\$&');
     }
 
+    static escapeHtml(str)
+    {
+        if(!str) return str;
+        return str
+        .replace(/&/g, '&amp;')
+        .replace(/>/g, '&gt;')
+        .replace(/</g, '&lt;');
+    }
+
     static getAsBase64(input)
     {
         return Buffer.from(input).toString('base64');

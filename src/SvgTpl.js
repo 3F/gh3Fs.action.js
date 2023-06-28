@@ -8,6 +8,7 @@ import Arguments from './Arguments';
 import JtCaptureHandler from './JtCaptureHandler'
 import JtRefuellerHandler from './JtRefuellerHandler'
 import { Jt } from 'mrjt'
+import { JtIfHandler } from 'mrjt';
 
 export default class SvgTpl
 {
@@ -16,11 +17,13 @@ export default class SvgTpl
     #jt;
     #jtc;
     #jtr;
+    #jtif;
 
     async render(svg, values)
     {
         return this.#jt
         .set('!', await this.#fs.readFile(svg, 'utf8'))
+        .sa(this.#jtif, values)
         .sa(this.#jtc)
         .sa(this.#jtr, values)
         .as(Arguments.toJt(values))
@@ -41,5 +44,12 @@ export default class SvgTpl
 
         this.#jtc = new JtCaptureHandler('{}');
         this.#jtr = new JtRefuellerHandler('[[]]');
+
+        this.#jtif = new JtIfHandler([ '{}' ],
+        {
+            if: 'if',
+            else: '/',
+            fi: ';',
+        });
     }
 }

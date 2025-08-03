@@ -1,6 +1,6 @@
 {
   "name": "gh3fs.action.js",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "an action in action ... github/3F",
   "main": "src/app.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "homepage": "https://github.com/3F/gh3Fs.action.js#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
-    "@actions/github": "^5.1.1",
+    "@actions/github": "^6.0.1",
     "mrjt": "^1.0.0"
   }
 }

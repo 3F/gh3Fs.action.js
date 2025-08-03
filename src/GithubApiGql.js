@@ -199,7 +199,7 @@ export default class GithubApiGql
 
     async trimWorkflowRuns(minimal)
     {
-        //FIXME: Seems github only provide REST API for "Workflow Runs" today.
+        //FIXME: github still provides only REST API for "Workflow Runs" today.
         //       i.e. No queries or mutations for GraphQL.
 
         const limit = 100;
@@ -464,12 +464,22 @@ export default class GithubApiGql
 
     async #deleteWorkflowRun(data)
     {
-        //FIXME: Seems github only provide REST API for "Workflow Runs" today.
+        //FIXME: github still provides only REST API for "Workflow Runs" today.
         //       i.e. No queries or mutations for GrapghQL.
+
+        if(data.status === "queued"
+            || data.status === "pending"
+            || data.status === "waiting"
+            || data.status === "in_progress")
+        {
+            return; // ignore due to 403 protection, we can not do anything with it:
+                    // even manual cancellation of the 2weeks+ "queued" can lead to ~"Failed to cancel workflow".
+                    // But GitHub should recycle all this later anyway. Same here: https://github.com/orgs/community/discussions/25570
+        }
 
         const rid = data.id;
 
-        Log.dbg("delete workflow run ... ", [ rid, data.name, data.created_at ]);
+        Log.dbg("delete workflow run ... ", [ rid, data.status, data.name, data.created_at ]);
 
         await this.#octokit.rest.actions.deleteWorkflowRun({
             owner: this.#username,
